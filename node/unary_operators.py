@@ -9,13 +9,13 @@ class OperatorNotNode(UnaryOperatorNode):
         super().__init__(operand)
 
     def __repr__(self):
-        return f"not {self.operand}"
+        return f"not {self.left}"
 
     def __str__(self):
-        return f"(not {self.operand})"
+        return f"(not {self.left})"
 
     def expand(self):
-        return f"(^xtf.x f t) {self.operand}"
+        return f"(^xtf.x f t) {self.left}"
 
 
 unary_operators = [

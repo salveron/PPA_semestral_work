@@ -1,4 +1,15 @@
 
+simplifications_dict = {
+    "succ": "(^xsz.s (x s z))",
+    "pred": "(^xsz. x (^fg.g (f s)) (^g.z) (^m.m))",
+    "true": "T",
+    "false": "F",
+    "zero": "(^x.x (^y.F) T)",
+    "Y": "(^f.(^x.f (x x)) (^x.f (x x)))",
+    "fac": "Y (^fn. zero n 1 (* n (f (pred n))))",
+}
+
+
 class FunctionNode:
     def __init__(self, args, body):
         self.args = args
@@ -23,9 +34,7 @@ class ApplicationNode:
         return f"APPL:{self.func} {self.arg}"
 
     def __str__(self):
-        return f"{self.func} {self.arg}" \
-            if isinstance(self.func, FunctionNode) \
-            else f"({self.func} {self.arg})"
+        return f"({self.func} {self.arg})"
 
     def __eq__(self, other):
         return self.func == other.func and self.arg == other.arg
@@ -35,8 +44,8 @@ class UnaryOperatorNode:
     sign = None
     re_char = None
 
-    def __init__(self, operand):
-        self.operand = operand
+    def __init__(self, left):
+        self.left = left
 
     def __repr__(self):
         pass
@@ -45,7 +54,7 @@ class UnaryOperatorNode:
         pass
 
     def __eq__(self, other):
-        return self.operand == other.operand
+        return self.left == other.left
 
     def expand(self):
         pass
@@ -105,5 +114,8 @@ class LiteralNode:
         elif self.value == "F":
             return "(^ab.b)"
         else:
-            num = int(self.value)
-            return "(^sz." + "s(" * num + "z" + ")" * (num + 1)
+            try:
+                num = int(self.value)
+                return "(^sz." + "s(" * num + "z" + ")" * (num + 1)
+            except ValueError:
+                return simplifications_dict[self.value]

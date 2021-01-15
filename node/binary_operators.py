@@ -15,7 +15,7 @@ class OperatorPlusNode(BinaryOperatorNode):
         return f"(+ {self.left} {self.right})"
 
     def expand(self):
-        return f"{self.left} (^abc.b (a b c)) {self.right}"
+        return f"(^xysz.x s (y s z)) {self.left} {self.right}"
 
 
 class OperatorMultiplyNode(BinaryOperatorNode):
@@ -32,7 +32,7 @@ class OperatorMultiplyNode(BinaryOperatorNode):
         return f"(* {self.left} {self.right})"
 
     def expand(self):
-        return f"{self.left} (^xyz.x (y z)) {self.right}"
+        return f"(^xysz.x (y s) z) {self.left} {self.right}"
 
 
 class OperatorAndNode(BinaryOperatorNode):
@@ -49,7 +49,7 @@ class OperatorAndNode(BinaryOperatorNode):
         return f"(and {self.left} {self.right})"
 
     def expand(self):
-        return f"{self.left} (^xy. x y (^tf. f)) {self.right}"
+        return f"(^xy. x y (^tf. f)) {self.left} {self.right}"
 
 
 class OperatorOrNode(BinaryOperatorNode):
@@ -66,7 +66,7 @@ class OperatorOrNode(BinaryOperatorNode):
         return f"(or {self.left} {self.right})"
 
     def expand(self):
-        return f"{self.left} (^xy. x (^tf. t) y) {self.right}"
+        return f"(^xy. x (^tf. t) y) {self.left} {self.right}"
 
 
 class OperatorXorNode(BinaryOperatorNode):
@@ -83,7 +83,7 @@ class OperatorXorNode(BinaryOperatorNode):
         return f"(xor {self.left} {self.right})"
 
     def expand(self):
-        return f"{self.left} (^xy. x (y (^tf. f)(^tf. t)) y) {self.right}"
+        return f"(^xy. x (y (^tf. f)(^tf. t)) y) {self.left} {self.right}"
 
 
 binary_operators = [
