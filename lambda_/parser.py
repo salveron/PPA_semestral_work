@@ -2,6 +2,7 @@ import re
 from collections import deque
 
 from node.nodes import *
+from node.unary_operators import *
 from node.binary_operators import *
 
 
@@ -22,12 +23,13 @@ def check_parentheses(expression):
 
 class LambdaParser:
     def __init__(self):
-        self.function_parts_dict = dict()
+        self.primary_tokenizer = re.compile("([()^.TF]|" +
+                                            "|".join([op.re_char for op in unary_operators]) +
+                                            "|".join([op.re_char for op in binary_operators]) +
+                                            ")|\s+").split
 
-        self.primary_tokenizer = re.compile(r"([()+\-*/^.])|\s+").split
-
-        self.variable_re_pattern = re.compile(r"([a-z])")
-        self.number_re_pattern = re.compile(r"(\d+)")
+        self.variable_re_pattern = re.compile("([a-z])")
+        self.literal_re_pattern = re.compile("(\d+|[TF])")
 
     def __l_par(self, t_stack):
         result = self._appl_parse(t_stack)
@@ -52,26 +54,28 @@ class LambdaParser:
             raise ValueError("Bad function body.")
         return FunctionNode(args, body)
 
-    def __bin_op(self, t_stack, sign):
+    def __un_op(self, t_stack, operator):
+        left = self._exp_parse(t_stack)
+        for op_node in unary_operators:
+            if op_node.sign == operator:
+                return op_node(left)
+        raise ValueError("Bad unary operator.")
+
+    def __bin_op(self, t_stack, operator):
         left = self._exp_parse(t_stack)
         right = self._exp_parse(t_stack)
-
-        if sign == "+":
-            return OperatorPlusNode(left, right)
-        elif sign == "-":
-            return OperatorMinusNode(left, right)
-        elif sign == "*":
-            return OperatorMultiplyNode(left, right)
-        elif sign == "/":
-            return OperatorDivideNode(left, right)
+        for op_node in binary_operators:
+            if op_node.sign == operator:
+                return op_node(left, right)
+        raise ValueError("Bad binary operator.")
 
     def __var_num(self, varnum):
         variable_match = self.variable_re_pattern.fullmatch(varnum)
         if not variable_match:
-            number_match = self.number_re_pattern.fullmatch(varnum)
+            number_match = self.literal_re_pattern.fullmatch(varnum)
             if not number_match:
                 raise ValueError("Bad input.")
-            return NumberNode(number_match.group(0))
+            return LiteralNode(number_match.group(0))
         return VariableNode(variable_match.group(0))
 
     def _exp_parse(self, t_stack):
@@ -83,7 +87,9 @@ class LambdaParser:
             return self.__l_par(t_stack)
         elif token == "^":
             return self.__func(t_stack)
-        elif token in ["+", "-", "*", "/"]:
+        elif token in [op.sign for op in unary_operators]:
+            return self.__un_op(t_stack, token)
+        elif token in [op.sign for op in binary_operators]:
             return self.__bin_op(t_stack, token)
         else:
             return self.__var_num(token)
@@ -105,8 +111,7 @@ class LambdaParser:
         check_parentheses(expression)
 
         tokens = deque(filter(None, self.primary_tokenizer(expression)))
-        print(f"Primary tokens: {list(tokens)}")
 
         result = self._appl_parse(tokens)
-        print(f"{result}")
+        print(f"After parsing: {result}")
         return result

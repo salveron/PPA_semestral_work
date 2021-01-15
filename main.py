@@ -1,20 +1,20 @@
 import os
 
-from lambda_parser.parser import *
+from lambda_.desugarer import *
 
 
 def main():
-    print("Running tests...")
+    print("\nRunning tests...")
 
     os.system("pytest")
 
-    print("\n\nGreetings! Please enter a valid lambda expression, so I can desugar it "
+    print("\nGreetings! Please enter a valid lambda expression, so I can desugar it "
           "(use '^' symbol instead of greek lambda and Ctrl+C to exit):")
 
     while True:
         try:
             input_str = input()
-            LambdaParser().parse(input_str)
+            LambdaDesugarer().desugar(input_str)
         except ValueError as e:
             print(*e.args, "Please try again:")
         except KeyboardInterrupt:

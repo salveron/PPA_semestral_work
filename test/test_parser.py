@@ -1,5 +1,6 @@
-from lambda_parser.parser import LambdaParser
+from lambda_.parser import LambdaParser
 from node.nodes import *
+from node.unary_operators import *
 from node.binary_operators import *
 
 parser = LambdaParser()
@@ -7,9 +8,9 @@ parser = LambdaParser()
 
 def test_parser_varnum():
     assert parser.parse("x") == VariableNode("x")
-    assert parser.parse("1") == NumberNode("1")
+    assert parser.parse("1") == LiteralNode("1")
     assert parser.parse("   x   ") == VariableNode("x")
-    assert parser.parse("   1   ") == NumberNode("1")
+    assert parser.parse("   1   ") == LiteralNode("1")
     assert parser.parse("((((((((((x))))))))))") == VariableNode("x")
     assert parser.parse("x") == VariableNode("x")
     assert parser.parse("x") == VariableNode("x")
@@ -25,14 +26,17 @@ def test_parser_appl():
     assert parser.parse("(x y) (z w)") == ApplicationNode(ApplicationNode(VariableNode("x"), VariableNode("y")), ApplicationNode(VariableNode("z"), VariableNode("w")))
 
 
-def test_parser_binop():
+def test_parser_bin_op():
     assert parser.parse("+ x y") == OperatorPlusNode(VariableNode("x"), VariableNode("y"))
-    assert parser.parse("- x y") == OperatorMinusNode(VariableNode("x"), VariableNode("y"))
     assert parser.parse("* x y") == OperatorMultiplyNode(VariableNode("x"), VariableNode("y"))
-    assert parser.parse("/ x y") == OperatorDivideNode(VariableNode("x"), VariableNode("y"))
+    assert parser.parse("and x y") == OperatorAndNode(VariableNode("x"), VariableNode("y"))
+    assert parser.parse("or x y") == OperatorOrNode(VariableNode("x"), VariableNode("y"))
+    assert parser.parse("xor x y") == OperatorXorNode(VariableNode("x"), VariableNode("y"))
+    assert parser.parse("not x") == OperatorNotNode(VariableNode("x"))
     assert parser.parse("    +     x        y     ") == OperatorPlusNode(VariableNode("x"), VariableNode("y"))
-    assert parser.parse(" + x (- y 1)") == OperatorPlusNode(VariableNode("x"), OperatorMinusNode(VariableNode("y"), NumberNode("1")))
-    assert parser.parse("+ (*  x  3) (/ y z)") == OperatorPlusNode(OperatorMultiplyNode(VariableNode("x"), NumberNode("3")), OperatorDivideNode(VariableNode("y"), VariableNode("z")))
+    assert parser.parse(" + x (* y 1)") == OperatorPlusNode(VariableNode("x"), OperatorMultiplyNode(VariableNode("y"), LiteralNode("1")))
+    assert parser.parse("and (or  x  y) (xor a b)") == OperatorAndNode(OperatorOrNode(VariableNode("x"), VariableNode("y")),
+                                                                       OperatorXorNode(VariableNode("a"), VariableNode("b")))
 
 
 def test_parser_func():
@@ -42,18 +46,18 @@ def test_parser_func():
            FunctionNode("x", VariableNode("x"))
     assert parser.parse("(^x.(^y.y) x) 1") == \
            ApplicationNode(FunctionNode("x", ApplicationNode(FunctionNode("y", VariableNode("y")), VariableNode("x"))),
-                           NumberNode("1"))
+                           LiteralNode("1"))
     assert parser.parse("(^x  .(^  y  .  y  )  (^   z  .  z) ) 1") == \
            ApplicationNode(FunctionNode("x", ApplicationNode(FunctionNode("y", VariableNode("y")),
-                                                             FunctionNode("z", VariableNode("z")))), NumberNode("1"))
+                                                             FunctionNode("z", VariableNode("z")))), LiteralNode("1"))
     assert parser.parse("(^xyz.(x y z)) 1 2 3") == \
            ApplicationNode(ApplicationNode(ApplicationNode(FunctionNode("xyz", ApplicationNode(ApplicationNode(
                VariableNode("x"), VariableNode("y")), VariableNode("z"))),
-               NumberNode("1")), NumberNode("2")), NumberNode("3"))
-    assert parser.parse("(^xy.(^z.(+ x (/ y 2))) 1000 (^t.t)) 4 5") == \
+                                                           LiteralNode("1")), LiteralNode("2")), LiteralNode("3"))
+    assert parser.parse("(^xy.(^z.(+ x (* y 2))) 1000 (^t.t)) 4 5") == \
            ApplicationNode(ApplicationNode(FunctionNode("xy", ApplicationNode(ApplicationNode(
-               FunctionNode("z", OperatorPlusNode(VariableNode("x"), OperatorDivideNode(VariableNode("y"), NumberNode("2")))),
-               NumberNode("1000")), FunctionNode("t", VariableNode("t")))), NumberNode("4")), NumberNode("5"))
+               FunctionNode("z", OperatorPlusNode(VariableNode("x"), OperatorMultiplyNode(VariableNode("y"), LiteralNode("2")))),
+               LiteralNode("1000")), FunctionNode("t", VariableNode("t")))), LiteralNode("4")), LiteralNode("5"))
 
 
 def test_invalid_inputs():
@@ -61,7 +65,9 @@ def test_invalid_inputs():
                   "Bad function arguments.",
                   "Bad function formatting.",
                   "Bad function.",
-                  "Bad input."]
+                  "Bad input.",
+                  "Bad unary operator.",
+                  "Bad binary operator."]
 
     def _helper(expression):
         try:
