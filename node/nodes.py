@@ -1,5 +1,5 @@
 
-simplifications_dict = {
+symbolic_functions = {
     "succ": "(^xsz.s (x s z))",
     "pred": "(^xsz. x (^fg.g (f s)) (^g.z) (^m.m))",
     "true": "T",
@@ -118,4 +118,4 @@ class LiteralNode:
                 num = int(self.value)
                 return "(^sz." + "s(" * num + "z" + ")" * (num + 1)
             except ValueError:
-                return simplifications_dict[self.value]
+                return symbolic_functions[self.value]

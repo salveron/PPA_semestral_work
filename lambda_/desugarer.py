@@ -6,7 +6,7 @@ class LambdaDesugarer:
 
     To desugar, pass a valid lambda calculus expression to the desugar method. This method will parse the passed
     string (see LambdaParser class in the parser module), then expand the reserved literals and functions
-    from the node.nodes.simplifications_dict dictionary and finally expand the multi-argument functions
+    from the node.nodes.symbolic_functions dictionary and finally expand the multi-argument functions
     to fit the pure lambda calculus definitions. The final result of desugaring is a tree of nodes that can be
     easily represented as a string with a help of nodes' __repr__ and __str__ methods.
     """
@@ -87,7 +87,7 @@ class LambdaDesugarer:
         root = self.parser.parse(expression)
         print(f"After parsing: {root}")
 
-        # then expand the reserved literals (T, F or numbers) and things from the dictionary (e.g. zero function)
+        # then expand the reserved literals (T, F or numbers) and symbolic functions (e.g. zero function)
         root = self._expand(root)
         print(f"After expansion: {root}")
 

@@ -44,11 +44,11 @@ class LambdaParser:
                                     ")|\s+").split
 
         # patterns to match lambda calculus variables, numbers, True/False literals or reserved functions from the
-        # node.nodes.simplifications_dict dictionary (these reserved functions are represented as literals to be then
+        # node.nodes.symbolic_functions dictionary (these reserved functions are represented as literals to be then
         # easily expanded by a desugarer)
         self.variable_re_pattern = re.compile("([a-z])")
         self.literal_re_pattern = re.compile("(\d+|[TF]|" +
-                                             "|".join([func for func in simplifications_dict.keys()]) +
+                                             "|".join([func for func in symbolic_functions.keys()]) +
                                              ")")
 
     def __l_par(self, t_stack):
