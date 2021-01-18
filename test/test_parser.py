@@ -3,7 +3,8 @@ from node.nodes import *
 from node.unary_operators import *
 from node.binary_operators import *
 
-parser = LambdaParser()
+# don't need any symbolic functions here
+parser = LambdaParser(dict())
 
 
 def test_parser_varnum():

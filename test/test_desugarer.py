@@ -1,6 +1,11 @@
 from lambda_.desugarer import *
 
-desugarer = LambdaDesugarer()
+# predefined symbolic functions - only for testing
+symbolic_functions = {
+    "zero": "(^x.x (^y.F) T)",
+    "Y": "(^f.(^x.f (x x)) (^x.f (x x)))",
+}
+desugarer = LambdaDesugarer(symbolic_functions)
 
 
 def test_multiple_args_fns():
@@ -59,5 +64,3 @@ def test_substitution():
         FunctionNode("x", ApplicationNode(VariableNode("f"), ApplicationNode(VariableNode("x"), VariableNode("x"))))))
     assert desugarer.desugar("Y (^xyz.(^ab.a b) x y) 1 2 3") == \
            desugarer.desugar("(^f.(^x.f (x x)) (^x.f (x x))) (^x.(^y.(^z.(^a.(^b.a b) y) x))) 1 2 3")
-
-

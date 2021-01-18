@@ -36,7 +36,9 @@ class LambdaParser:
     about different nodes, see the node package.
     """
 
-    def __init__(self):
+    def __init__(self, symbolic_functions):
+        self.symbolic_functions = symbolic_functions
+
         # simple split function that splits by regular expression matches
         self.tokenizer = re.compile("([()^.TF]|" +
                                     "|".join([op.re_char for op in unary_operators]) +
@@ -48,7 +50,7 @@ class LambdaParser:
         # easily expanded by a desugarer)
         self.variable_re_pattern = re.compile("([a-z])")
         self.literal_re_pattern = re.compile("(\d+|[TF]|" +
-                                             "|".join([func for func in symbolic_functions.keys()]) +
+                                             "|".join([func for func in self.symbolic_functions.keys()]) +
                                              ")")
 
     def __l_par(self, t_stack):
@@ -104,10 +106,10 @@ class LambdaParser:
 
         variable_match = self.variable_re_pattern.fullmatch(varnum)
         if not variable_match:
-            number_match = self.literal_re_pattern.fullmatch(varnum)
-            if not number_match:
+            literal_match = self.literal_re_pattern.fullmatch(varnum)
+            if not literal_match:
                 raise ValueError("Bad input.")
-            return LiteralNode(number_match.group(0))
+            return LiteralNode(literal_match.group(0))
         return VariableNode(variable_match.group(0))
 
     def _exp_parse(self, t_stack):

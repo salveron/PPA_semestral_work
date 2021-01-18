@@ -11,8 +11,8 @@ class LambdaDesugarer:
     easily represented as a string with a help of nodes' __repr__ and __str__ methods.
     """
 
-    def __init__(self):
-        self.parser = LambdaParser()
+    def __init__(self, symbolic_functions):
+        self.parser = LambdaParser(symbolic_functions)
 
     def _expand(self, root):
         # if the node is ApplicationNode, recursively expand its two parts
@@ -23,12 +23,19 @@ class LambdaDesugarer:
         elif isinstance(root, FunctionNode):
             return FunctionNode(root.args, self._expand(root.body))
 
-        # if the node is either Operator or Literal, call the node's expand method (returns a string to be parsed),
+        # if the node is an Operator, call the node's expand method (returns a string to be parsed),
         # then parse it and recursively expand the resulted tree
         elif isinstance(root, UnaryOperatorNode) \
-                or isinstance(root, BinaryOperatorNode) \
-                or isinstance(root, LiteralNode):
+                or isinstance(root, BinaryOperatorNode):
             return self._expand(self.parser.parse(root.expand()))
+
+        # if the node is a Literal, check if it is a symbolic function. If true, parse the expression from the
+        # dictionary, otherwise use its expand method
+        elif isinstance(root, LiteralNode):
+            if root.value in self.parser.symbolic_functions:
+                return self._expand(self.parser.parse(self.parser.symbolic_functions[root.value]))
+            else:
+                return self._expand(self.parser.parse(root.expand()))
 
         # if the node is VariableNode, then just pass it outside
         else:

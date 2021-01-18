@@ -1,14 +1,4 @@
 
-symbolic_functions = {
-    "succ": "(^xsz.s (x s z))",
-    "pred": "(^xsz. x (^fg.g (f s)) (^g.z) (^m.m))",
-    "true": "T",
-    "false": "F",
-    "zero": "(^x.x (^y.F) T)",
-    "Y": "(^f.(^x.f (x x)) (^x.f (x x)))",
-    "fac": "Y (^fn. zero n 1 (* n (f (pred n))))",
-}
-
 
 class FunctionNode:
     def __init__(self, args, body):
@@ -114,8 +104,5 @@ class LiteralNode:
         elif self.value == "F":
             return "(^ab.b)"
         else:
-            try:
-                num = int(self.value)
-                return "(^sz." + "s(" * num + "z" + ")" * (num + 1)
-            except ValueError:
-                return symbolic_functions[self.value]
+            num = int(self.value)
+            return "(^sz." + "s(" * num + "z" + ")" * (num + 1)
